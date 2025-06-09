@@ -1081,7 +1081,7 @@ impl MainHandler {
                 vec![
                     CacheDirective::NoCache,
                     CacheDirective::MustRevalidate,
-                    CacheDirective::MaxAge(SECONDS)
+                    //CacheDirective::MaxAge(SECONDS)
                 ]
             } else {
                 vec![CacheDirective::Public, CacheDirective::MaxAge(SECONDS)]

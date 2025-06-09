@@ -1079,7 +1079,7 @@ impl MainHandler {
             };
             let cache = if self.must_revalidate {
                 vec![
-                    CacheDirective::Private,
+                    CacheDirective::NoCache,
                     CacheDirective::MustRevalidate,
                     CacheDirective::MaxAge(SECONDS)
                 ]

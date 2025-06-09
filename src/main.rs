@@ -82,6 +82,9 @@ fn main() {
         .arg(clap::Arg::with_name("nocache")
              .long("nocache")
              .help("Disable http cache"))
+        .arg(clap::Arg::with_name("must-revalidate")
+             .long("must-revalidate")
+             .help("Force revalidation"))
         .arg(clap::Arg::with_name("norange")
              .long("norange")
              .help("Disable header::Range support (partial request)"))
@@ -230,6 +233,7 @@ fn main() {
         .map(Result::unwrap);
     let sort = !matches.is_present("nosort");
     let cache = !matches.is_present("nocache");
+    let must_revalidate = matches.is_present("must-revalidate") && !cache;
     let range = !matches.is_present("norange");
     let cert = matches.value_of("cert");
     let certpass = matches.value_of("certpass");
@@ -307,6 +311,7 @@ fn main() {
                 &vec![
                     enable_string(index),
                     enable_string(cache),
+                    enable_string(must_revalidate),
                     enable_string(cors),
                     enable_string(coop),
                     enable_string(coep),
@@ -351,6 +356,7 @@ fn main() {
         index,
         upload,
         cache,
+        must_revalidate,
         range,
         coop,
         coep,
@@ -435,6 +441,7 @@ struct MainHandler {
     index: bool,
     upload: Option<Upload>,
     cache: bool,
+    must_revalidate: bool,
     range: bool,
     coop: bool,
     coep: bool,
@@ -1070,7 +1077,16 @@ impl MainHandler {
                     return Ok(Response::with(status::NotModified));
                 }
             };
-            let cache = vec![CacheDirective::Public, CacheDirective::MaxAge(SECONDS)];
+            let cache = if self.must_revalidate {
+                vec![
+                    CacheDirective::Private,
+                    CacheDirective::MustRevalidate,
+                    CacheDirective::MaxAge(SECONDS)
+                ]
+            } else {
+                vec![CacheDirective::Public, CacheDirective::MaxAge(SECONDS)]
+            };
+            //let cache = vec![CacheDirective::Public, CacheDirective::MaxAge(SECONDS)];
             resp.headers.set(CacheControl(cache));
             resp.headers.set(LastModified(HttpDate(time::at(modified))));
             resp.headers.set(ETag(etag));

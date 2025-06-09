@@ -233,7 +233,7 @@ fn main() {
         .map(Result::unwrap);
     let sort = !matches.is_present("nosort");
     let cache = !matches.is_present("nocache");
-    let must_revalidate = matches.is_present("must-revalidate") && !cache;
+    let must_revalidate = matches.is_present("must-revalidate");
     let range = !matches.is_present("norange");
     let cert = matches.value_of("cert");
     let certpass = matches.value_of("certpass");
